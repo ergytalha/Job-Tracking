@@ -37,18 +37,5 @@
     "oncelik": "yuksek",
     "sorumlu": "Talha",
     "created_at": "2025-07-29T14:36:08.862Z"
-  },
-  {
-    "id": 4,
-    "ad": "rwr",
-    "musteri": "rwwrrw",
-    "durum": "tamamlandi",
-    "aciklama": "",
-    "butce": 78888,
-    "baslangicTarihi": "2025-07-24",
-    "bitisTarihi": "2025-07-31",
-    "oncelik": "yuksek",
-    "sorumlu": "rwwrwr",
-    "created_at": "2025-07-29T14:37:06.785Z"
   }
 ]
