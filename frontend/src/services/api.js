@@ -1,4 +1,3 @@
-// frontend/src/services/api.js
 import { useEffect, useState } from "react";
 import axios from "axios";
 

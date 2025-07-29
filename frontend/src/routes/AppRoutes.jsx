@@ -20,8 +20,10 @@ const AppRoutes = (props) => {
         <Route path="/dashboard" element={<DashboardPage {...props} />} />
         <Route path="/projeler" element={<ProjectsPage />} />
         <Route path="/revisions" element={<RevisionsPage />} />
-<Route path="/revizyonlar" element={<Navigate to="/revisions" replace />} />
-
+        <Route
+          path="/revizyonlar"
+          element={<Navigate to="/revisions" replace />}
+        />
         <Route path="/reports" element={<ReportsPage {...props} />} />
         <Route path="/team" element={<TeamPage {...props} />} />
         <Route path="/settings" element={<SettingsPage {...props} />} />
