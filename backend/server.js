@@ -11,8 +11,10 @@ const PORT = process.env.PORT || 5001;
 const allowedOrigins = [
   'http://localhost:5174',
   'https://job-tracking-blue.vercel.app',
-  'https://job-tracking-git-main-talha-erguneys-projects.vercel.app'
+  'https://job-tracking-git-main-talha-erguneys-projects.vercel.app',
+  'https://job-tracking-befd.onrender.com' // ✅ Eklendi
 ];
+
 
 app.use(cors({
   origin: function (origin, callback) {
