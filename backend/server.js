@@ -12,7 +12,8 @@ const allowedOrigins = [
   'http://localhost:5174',
   'https://job-tracking-blue.vercel.app',
   'https://job-tracking-git-main-talha-erguneys-projects.vercel.app',
-  'https://job-tracking-befd.onrender.com' // ✅ Eklendi
+  'https://job-tracking-befd.onrender.com',
+  'https://jobtracking1.netlify.app',
 ];
 
 
