@@ -7,7 +7,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// ✅ Güvenli CORS tanımı (localhost + Vercel)
+// --- CORS Ayarları ---
 const allowedOrigins = [
   'http://localhost:5174',
   'https://job-tracking-blue.vercel.app',
@@ -15,11 +15,12 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('CORS hatası: ' + origin));
+      console.warn('⛔ CORS reddedildi:', origin);
+      callback(new Error('CORS hatası: Yetkisiz origin'));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -27,6 +28,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
 
 // ✅ Veri yolları
 const dataDir = path.join(__dirname, 'data');
