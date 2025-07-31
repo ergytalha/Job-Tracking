@@ -10,8 +10,10 @@ const PORT = process.env.PORT || 5001;
 // ✅ Güvenli CORS tanımı (localhost + Vercel)
 const allowedOrigins = [
   'http://localhost:5174',
-  'https://job-tracking-blue.vercel.app'
+  'https://job-tracking-blue.vercel.app',
+  'https://job-tracking-git-main-talha-erguneys-projects.vercel.app'
 ];
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
