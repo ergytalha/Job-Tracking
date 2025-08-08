@@ -25,5 +25,14 @@ dist-ssr
 # Environment files
 .env
 .env.*
-.env
-.env.*  # Bu satır .env.production gibi dosyaları da kapsar
+
+# Data files (hassas veriler)
+backend/data/*.json
+
+# Build files
+backend/frontend/dist/
+frontend/dist/
+
+# OS files
+.DS_Store
+Thumbs.db

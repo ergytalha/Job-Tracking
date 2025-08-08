@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   Plus,
   FolderPlus,
@@ -33,6 +34,7 @@ const DashboardPage = () => {
     verileriYukle,
   } = useApiData();
 
+  const { user } = useAuth();
   const projeModal = useModal();
   const revizyonModal = useModal();
   const navigate = useNavigate();
@@ -114,8 +116,12 @@ const DashboardPage = () => {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-blue-600" />
-              <h1 className="text-xl font-bold text-gray-800">Dashboard</h1>
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">İT</span>
+              </div>
+              <span className="text-lg font-semibold text-gray-800">
+                İş Takip Sistemi
+              </span>
             </div>
             <div className="h-6 w-px bg-gray-300"></div>
             <button
@@ -158,6 +164,7 @@ const DashboardPage = () => {
 
       {/* Hızlı Eylem Kartları */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Yeni Proje - Tüm kullanıcılar */}
         <div
           onClick={projeModal.openModal}
           className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105"
@@ -170,6 +177,7 @@ const DashboardPage = () => {
           <p className="text-blue-100 text-sm">Yeni bir proje başlat</p>
         </div>
 
+        {/* Revizyonlar - Tüm kullanıcılar */}
         <div
           onClick={() => navigate("/revizyonlar")}
           className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white cursor-pointer hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105"
@@ -184,6 +192,7 @@ const DashboardPage = () => {
           </p>
         </div>
 
+        {/* Tüm Projeler - Tüm kullanıcılar */}
         <div
           onClick={() => navigate("/projeler")}
           className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white cursor-pointer hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105"
@@ -198,17 +207,47 @@ const DashboardPage = () => {
           </p>
         </div>
 
-        <div
-          onClick={() => navigate("/settings")}
-          className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl p-6 text-white cursor-pointer hover:from-gray-600 hover:to-gray-700 transition-all transform hover:scale-105"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <Settings className="w-8 h-8" />
-            <ExternalLink className="w-5 h-5 opacity-75" />
+        {/* Raporlar - Admin ve Editor */}
+        {user?.role === 'admin' || user?.role === 'editor' ? (
+          <div
+            onClick={() => navigate("/reports")}
+            className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white cursor-pointer hover:from-orange-600 hover:to-orange-700 transition-all transform hover:scale-105"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <BarChart3 className="w-8 h-8" />
+              <ExternalLink className="w-5 h-5 opacity-75" />
+            </div>
+            <h3 className="text-lg font-semibold mb-1">Raporlar</h3>
+            <p className="text-orange-100 text-sm">Detaylı analizler</p>
           </div>
-          <h3 className="text-lg font-semibold mb-1">Ayarlar</h3>
-          <p className="text-gray-100 text-sm">Sistem ayarları</p>
-        </div>
+        ) : (
+          <div
+            onClick={() => navigate("/team")}
+            className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 text-white cursor-pointer hover:from-indigo-600 hover:to-indigo-700 transition-all transform hover:scale-105"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <Users className="w-8 h-8" />
+              <ExternalLink className="w-5 h-5 opacity-75" />
+            </div>
+            <h3 className="text-lg font-semibold mb-1">Ekip</h3>
+            <p className="text-indigo-100 text-sm">Takım üyeleri</p>
+          </div>
+        )}
+
+        {/* Ayarlar - Sadece Admin */}
+        {user?.role === 'admin' && (
+          <div
+            onClick={() => navigate("/settings")}
+            className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl p-6 text-white cursor-pointer hover:from-gray-600 hover:to-gray-700 transition-all transform hover:scale-105"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <Settings className="w-8 h-8" />
+              <ExternalLink className="w-5 h-5 opacity-75" />
+            </div>
+            <h3 className="text-lg font-semibold mb-1">Ayarlar</h3>
+            <p className="text-gray-100 text-sm">Sistem ayarları</p>
+          </div>
+        )}
       </div>
 
       {/* Ana İçerik */}

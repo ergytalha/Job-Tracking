@@ -11,23 +11,82 @@ import RevisionsPage from "../pages/RevisionsPage";
 import ReportsPage from "../pages/ReportsPage";
 import TeamPage from "../pages/TeamPage";
 import SettingsPage from "../pages/SettingsPage";
+import Login from "../pages/Login";
+import Unauthorized from "../pages/Unauthorized";
+import PrivateRoute from "./PrivateRoute";
+import RoleRoute from "./RoleRoute";
+import Layout from "../components/Layout/Layout";
 
 const AppRoutes = (props) => {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<DashboardPage {...props} />} />
-        <Route path="/projeler" element={<ProjectsPage />} />
-        <Route path="/revisions" element={<RevisionsPage />} />
-        <Route
-          path="/revizyonlar"
-          element={<Navigate to="/revisions" replace />}
-        />
-        <Route path="/reports" element={<ReportsPage {...props} />} />
-        <Route path="/team" element={<TeamPage {...props} />} />
-        <Route path="/settings" element={<SettingsPage {...props} />} />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+          <Route path="/login" element={<Login />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <DashboardPage {...props} />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/projeler"
+            element={
+              <PrivateRoute>
+                <ProjectsPage />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/revisions"
+            element={
+              <PrivateRoute>
+                <RevisionsPage />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/revizyonlar"
+            element={<Navigate to="/revisions" replace />}
+          />
+
+          <Route
+            path="/reports"
+            element={
+              <RoleRoute roles={['admin', 'editor']}>
+                <ReportsPage {...props} />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/team"
+            element={
+              <RoleRoute roles={['admin']}>
+                <TeamPage {...props} />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <RoleRoute roles={['admin']}>
+                <SettingsPage {...props} />
+              </RoleRoute>
+            }
+          />
+        </Routes>
+      </Layout>
     </Router>
   );
 };

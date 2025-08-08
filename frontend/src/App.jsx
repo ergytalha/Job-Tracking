@@ -2,13 +2,12 @@ import React from "react";
 import AppRoutes from "./routes/AppRoutes";
 import { ProjectProvider } from "./context/ProjectContext";
 import './index.css';
+import './App.css';
 
 const App = () => {
   return (
     <ProjectProvider>
-      <main className="min-h-screen bg-gray-100 p-4">
-        <AppRoutes />
-      </main>
+      <AppRoutes />
     </ProjectProvider>
   );
 };

@@ -15,25 +15,23 @@ export function useApiData() {
     try {
       setYukleniyor(true);
       const [p, r, i] = await Promise.all([
-        axios.get(`${API_URL}/api/projeler`),
-        axios.get(`${API_URL}/api/revizyonlar`),
-        axios.get(`${API_URL}/api/istatistikler`)
+        axios.get(`${API_URL}/api/projeler`),      
+        axios.get(`${API_URL}/api/revizyonlar`),    
+        axios.get(`${API_URL}/api/istatistikler`)   
       ]);
-  
-      console.log("İstatistik verisi:", i.data); // ✔️ burada olmalı
-  
+
+      console.log("İstatistik verisi:", i.data);
+
       setProjeler(p.data);
       setRevizyonlar(r.data);
       setIstatistikler(i.data);
     } catch (err) {
-      console.error(err);
+      console.error("Veri çekme hatası:", err);
       setHata(err);
     } finally {
       setYukleniyor(false);
     }
   };
-  
- 
 
   useEffect(() => {
     verileriYukle();

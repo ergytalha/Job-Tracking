@@ -2,10 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 0; // Port 0 = auto-assign
 
 // --- CORS Ayarları ---
 const allowedOrigins = [
@@ -14,8 +13,8 @@ const allowedOrigins = [
   'https://job-tracking-git-main-talha-erguneys-projects.vercel.app',
   'https://job-tracking-befd.onrender.com',
   'https://jobtracking1.netlify.app',
+  'https://ergydev.com.tr'
 ];
-
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -27,21 +26,23 @@ app.use(cors({
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 
+// === [ FRONTEND Build'i Serve Et ] ===
+app.use(express.static(path.join(__dirname, 'frontend/dist')));
 
-// ✅ Veri yolları
+// === [ API YOLLARI BAŞLANGIÇ ] ===
 const dataDir = path.join(__dirname, 'data');
 const projelerFile = path.join(dataDir, 'projeler.json');
 const revizyonlarFile = path.join(dataDir, 'revizyonlar.json');
+const kullanicilarFile = path.join(dataDir, 'users.json');
 
 // 🔧 Data klasörü yoksa oluştur
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
 
-// ✅ Yardımcı Fonksiyonlar
 const loadData = (file, defaultData) => {
   try {
     if (fs.existsSync(file)) {
@@ -69,15 +70,59 @@ const safeBudget = (budget) => {
   return isNaN(num) ? null : num;
 };
 
-// ✅ Başlangıç verileri
 let projeler = loadData(projelerFile, []).map(p => ({ ...p, butce: safeBudget(p.butce) }));
 let revizyonlar = loadData(revizyonlarFile, []);
+let kullanicilar = loadData(kullanicilarFile, [
+  { id: 1, username: 'admin', password: '123456', role: 'admin' }
+]);
 
-// İlk veri kaydı
 if (!fs.existsSync(projelerFile)) saveData(projelerFile, projeler);
 if (!fs.existsSync(revizyonlarFile)) saveData(revizyonlarFile, revizyonlar);
+if (!fs.existsSync(kullanicilarFile)) saveData(kullanicilarFile, kullanicilar);
 
-// === [ PROJELER ] ===
+// === [ LOGIN API ] ===
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  console.log('🔑 Login denemesi:', username);
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Kullanıcı adı ve şifre gerekli' });
+  }
+
+  // Kullanıcıyı bul
+  const user = kullanicilar.find(u => u.username === username && u.password === password);
+  
+  if (!user) {
+    console.log('❌ Login başarısız:', username);
+    return res.status(401).json({ error: 'Kullanıcı adı veya şifre yanlış' });
+  }
+
+  console.log('✅ Login başarılı:', username, 'rol:', user.role);
+  res.json({
+    token: `${user.role}_token_${Date.now()}`,
+    user: { 
+      id: user.id, 
+      username: user.username, 
+      role: user.role 
+    }
+  });
+});
+
+// === [ HEALTH CHECK ] ===
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    time: new Date().toISOString(),
+    nodeVersion: process.version,
+    counts: {
+      projeler: projeler.length,
+      revizyonlar: revizyonlar.length,
+      kullanicilar: kullanicilar.length
+    }
+  });
+});
+
+// === [ PROJELER API ] ===
 app.get('/api/projeler', (req, res) => {
   res.json(projeler.map(p => ({ ...p, butce: safeBudget(p.butce) })));
 });
@@ -102,8 +147,8 @@ app.post('/api/projeler', (req, res) => {
 
   projeler.push(yeniProje);
   return saveData(projelerFile, projeler)
-    ? res.status(201).json(yeniProje)
-    : res.status(500).json({ error: 'Kaydedilemedi.' });
+      ? res.status(201).json(yeniProje)
+      : res.status(500).json({ error: 'Kaydedilemedi.' });
 });
 
 app.put('/api/projeler/:id', (req, res) => {
@@ -115,8 +160,8 @@ app.put('/api/projeler/:id', (req, res) => {
 
   projeler[index] = { ...projeler[index], ...updated };
   return saveData(projelerFile, projeler)
-    ? res.json(projeler[index])
-    : res.status(500).json({ error: 'Güncellenemedi.' });
+      ? res.json(projeler[index])
+      : res.status(500).json({ error: 'Güncellenemedi.' });
 });
 
 app.delete('/api/projeler/:id', (req, res) => {
@@ -128,7 +173,7 @@ app.delete('/api/projeler/:id', (req, res) => {
   res.json({ success: true });
 });
 
-// === [ REVİZYONLAR ] ===
+// === [ REVİZYONLAR API ] ===
 app.get('/api/revizyonlar', (req, res) => res.json(revizyonlar));
 
 app.post('/api/revizyonlar', (req, res) => {
@@ -146,8 +191,8 @@ app.post('/api/revizyonlar', (req, res) => {
 
   revizyonlar.push(yeniRevizyon);
   return saveData(revizyonlarFile, revizyonlar)
-    ? res.status(201).json(yeniRevizyon)
-    : res.status(500).json({ error: 'Kaydedilemedi.' });
+      ? res.status(201).json(yeniRevizyon)
+      : res.status(500).json({ error: 'Kaydedilemedi.' });
 });
 
 app.put('/api/revizyonlar/:id', (req, res) => {
@@ -156,15 +201,15 @@ app.put('/api/revizyonlar/:id', (req, res) => {
 
   revizyonlar[index] = { ...revizyonlar[index], ...req.body };
   return saveData(revizyonlarFile, revizyonlar)
-    ? res.json(revizyonlar[index])
-    : res.status(500).json({ error: 'Güncellenemedi.' });
+      ? res.json(revizyonlar[index])
+      : res.status(500).json({ error: 'Güncellenemedi.' });
 });
 
 app.delete('/api/revizyonlar/:id', (req, res) => {
   revizyonlar = revizyonlar.filter(r => r.id != req.params.id);
   return saveData(revizyonlarFile, revizyonlar)
-    ? res.json({ success: true })
-    : res.status(500).json({ error: 'Silinemedi.' });
+      ? res.json({ success: true })
+      : res.status(500).json({ error: 'Silinemedi.' });
 });
 
 app.patch('/api/revizyonlar/:id', (req, res) => {
@@ -172,8 +217,8 @@ app.patch('/api/revizyonlar/:id', (req, res) => {
   if (index === -1) return res.status(404).json({ error: 'Revizyon bulunamadı.' });
   revizyonlar[index].durum = req.body.durum;
   return saveData(revizyonlarFile, revizyonlar)
-    ? res.json(revizyonlar[index])
-    : res.status(500).json({ error: 'Durum güncellenemedi.' });
+      ? res.json(revizyonlar[index])
+      : res.status(500).json({ error: 'Durum güncellenemedi.' });
 });
 
 // === [ İSTATİSTİKLER ] ===
@@ -195,14 +240,15 @@ app.get('/api/istatistikler', (req, res) => {
   });
 });
 
-// === [ SAĞLIK KONTROLÜ ] ===
+// === [ SAĞLIK TESTİ ] ===
 app.get('/api/test', (req, res) => {
   res.json({
     message: '✅ Backend çalışıyor!',
     endpoints: {
       projeler: '/api/projeler',
       revizyonlar: '/api/revizyonlar',
-      istatistikler: '/api/istatistikler'
+      istatistikler: '/api/istatistikler',
+      login: '/api/login'
     },
     toplamKayit: {
       projeler: projeler.length,
@@ -211,7 +257,65 @@ app.get('/api/test', (req, res) => {
   });
 });
 
+// === [ FRONTEND - Catch All Route with Environment Fix ] ===
+app.get('*', (req, res) => {
+  const indexPath = path.join(__dirname, 'frontend/dist', 'index.html');
+
+  if (fs.existsSync(indexPath)) {
+    let indexContent = fs.readFileSync(indexPath, 'utf8');
+
+    // localhost:5001 sorununu çöz
+    const fixScript = `
+      <script>
+        // API URL override
+        window.ENV = { VITE_API_URL: 'https://ergydev.com.tr' };
+        
+        // Global fetch override - localhost:5001'i production'a çevir
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+          let url = args[0];
+          if (typeof url === 'string') {
+            url = url.replace('localhost:5001', 'ergydev.com.tr');
+            url = url.replace('http://localhost:5001', 'https://ergydev.com.tr');
+            args[0] = url;
+          }
+          return originalFetch.apply(this, args);
+        };
+        
+        // Axios interceptor
+        document.addEventListener('DOMContentLoaded', function() {
+          if (window.axios) {
+            window.axios.interceptors.request.use(config => {
+              if (config.url) {
+                config.url = config.url.replace('localhost:5001', 'ergydev.com.tr');
+                config.url = config.url.replace('http://localhost:5001', 'https://ergydev.com.tr');
+              }
+              return config;
+            });
+          }
+        });
+        
+        console.log('🔧 API URL fixes applied');
+      </script>
+    `;
+
+    // Head tag'ine inject et
+    indexContent = indexContent.replace('<head>', '<head>' + fixScript);
+
+    res.send(indexContent);
+  } else {
+    res.status(404).send('Frontend bulunamadı');
+  }
+});
+
 // === [ SUNUCU BAŞLAT ] ===
 app.listen(PORT, () => {
   console.log(`🚀 Backend ${PORT} portunda çalışıyor`);
+  console.log(`📊 Yüklenen: ${projeler.length} proje, ${revizyonlar.length} revizyon`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('Server kapatılıyor...');
+  process.exit(0);
 });
